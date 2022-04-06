@@ -5,7 +5,7 @@ class ReactiveEffect {
     }
     run() {
         activeEffect = this;
-        this._fn()
+        return this._fn();
     }
 }
 
@@ -29,6 +29,8 @@ let activeEffect;
 export function effect(fn) {
     const _effect = new ReactiveEffect(fn)
     _effect.run();
+    // 修改函数的 this指向为 ReactiveEffect 实例
+    return _effect.run.bind(_effect)
 }
 
 export function trigger(target, key) {
