@@ -1,5 +1,7 @@
 import { extend } from "../shared";
 
+let activeEffect;
+let shouldtrack;
 class ReactiveEffect {
     private _fn: any;
     public scheduler: Function | undefined;
@@ -11,13 +13,22 @@ class ReactiveEffect {
         this.scheduler = scheduler
     }
     run() {
+        if (!this.active) {
+            return this._fn();
+        }
+        shouldtrack = true;
         activeEffect = this;
-        return this._fn();
+
+        const result = this._fn();
+
+        shouldtrack = false;
+
+        return result;
     }
     stop() {
         if (this.active) {
             cleanupEffect(this);
-            if(this.onStop){
+            if (this.onStop) {
                 this.onStop();
             }
             this.active = false;
@@ -29,11 +40,14 @@ function cleanupEffect(effect) {
     effect.deps.forEach((dep: any) => {
         dep.delete(effect)
     });
+    effect.deps.length = 0;
 }
 
 const targetMap = new Map()
 
 export function track(target, key) {
+
+    if (!isTracking()) return;
     let depsMap = targetMap.get(target)
     if (!depsMap) {
         depsMap = new Map();
@@ -44,12 +58,14 @@ export function track(target, key) {
         dep = new Set();
         depsMap.set(key, dep);
     }
-    if (!!activeEffect) {
-        dep.add(activeEffect)
-        activeEffect.deps.push(dep)
-    }
+    if(dep.has(activeEffect)) return;
+    dep.add(activeEffect)
+    activeEffect.deps.push(dep)
 }
-let activeEffect;
+
+function isTracking() {
+    return shouldtrack && activeEffect !== undefined
+}
 export function effect(fn, options: any = {}) {
     // scheduler 
     const _effect = new ReactiveEffect(fn, options.scheduler);
@@ -57,7 +73,7 @@ export function effect(fn, options: any = {}) {
     Object.assign(_effect, options);
     extend(_effect, options)
     _effect.run();
-    
+
     const runner: any = _effect.run.bind(_effect);
     // 有可能会丢失 _fn()
     runner.effect = _effect;
