@@ -12,6 +12,7 @@ describe('effect', () => {
             // nextAge = user.age ++;
             // 导致重复收集，每次get和set都会触发这个函数
             // 这个函数也会触发 get set
+            // 即 set触发依赖又会让 user.age+1不断循环下去
         })
         expect(nextAge).toBe(11);
         user.age++;

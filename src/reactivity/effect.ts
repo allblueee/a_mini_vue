@@ -16,6 +16,8 @@ class ReactiveEffect {
         if (!this.active) {
             return this._fn();
         }
+        // 更准确的来说 在被绑定函数内部，一定会通过get触发我们的响应式对象。
+        // 只有 effect 函数内部调用 run函数，通过_fn函数内部get触发响应式对象，才可以进行依赖收集
         shouldtrack = true;
         activeEffect = this;
 
@@ -70,7 +72,6 @@ export function effect(fn, options: any = {}) {
     // scheduler 
     const _effect = new ReactiveEffect(fn, options.scheduler);
     // options
-    Object.assign(_effect, options);
     extend(_effect, options)
     _effect.run();
 
