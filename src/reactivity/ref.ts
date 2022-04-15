@@ -2,10 +2,14 @@ import { hasChanged, isObject } from "../shared";
 import { isTracking, trackEffects, triggerEffects } from "./effect";
 import { reactive } from "./reactive";
 
+// ref 是单值类型
+// proxy 只针对对象进行代理，不能代理原始值
+// 因此用 对象包裹 ref
 class RefImpl {
     private _value: any;
     public dep;
     private _rawvalue: any;
+    public _v_isRef = true;
     constructor(value) {
         this._rawvalue = value;
         this._value = convert(value)
@@ -31,7 +35,7 @@ class RefImpl {
 }
 
 function convert(value) {
-    return isObject(value)?reactive(value):value
+    return isObject(value) ? reactive(value) : value
 }
 
 export function ref(value) {
@@ -42,4 +46,12 @@ function trackRefValue(ref) {
     if (isTracking()) {
         trackEffects(ref.dep)
     }
+}
+
+export function isRef(ref) {
+    return !!ref._v_isRef
+}
+
+export function unRef(ref) {
+    return isRef(ref) ? ref.value : ref;
 }
