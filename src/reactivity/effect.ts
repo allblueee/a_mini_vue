@@ -2,7 +2,23 @@ import { extend } from "../shared";
 
 let activeEffect;
 let shouldtrack;
-class ReactiveEffect {
+const targetMap = new Map()
+
+export function effect(fn, options: any = {}) {
+    // scheduler 
+    const _effect = new ReactiveEffect(fn, options.scheduler);
+    // options
+    extend(_effect, options)
+    _effect.run();
+
+    const runner: any = _effect.run.bind(_effect);
+    // 有可能会丢失 _fn()
+    runner.effect = _effect;
+    // 修改函数的 this指向为 ReactiveEffect 实例
+    return runner;
+}
+
+export class ReactiveEffect {
     private _fn: any;
     public scheduler: Function | undefined;
     deps = [];
@@ -45,7 +61,6 @@ function cleanupEffect(effect) {
     effect.deps.length = 0;
 }
 
-const targetMap = new Map()
 
 export function track(target, key) {
 
@@ -62,29 +77,16 @@ export function track(target, key) {
     }
     trackEffects(dep)
 }
-
+export function isTracking() {
+    return shouldtrack && activeEffect !== undefined
+}
 export function trackEffects(dep) {
     if (dep.has(activeEffect)) return;
     dep.add(activeEffect)
     activeEffect.deps.push(dep)
 }
 
-export function isTracking() {
-    return shouldtrack && activeEffect !== undefined
-}
-export function effect(fn, options: any = {}) {
-    // scheduler 
-    const _effect = new ReactiveEffect(fn, options.scheduler);
-    // options
-    extend(_effect, options)
-    _effect.run();
 
-    const runner: any = _effect.run.bind(_effect);
-    // 有可能会丢失 _fn()
-    runner.effect = _effect;
-    // 修改函数的 this指向为 ReactiveEffect 实例
-    return runner;
-}
 
 export function trigger(target, key) {
     let depsMap = targetMap.get(target)
@@ -92,7 +94,7 @@ export function trigger(target, key) {
     triggerEffects(dep)
 }
 
-export function triggerEffects(dep){
+export function triggerEffects(dep) {
     for (const effect of dep) {
         if (effect.scheduler) {
             effect.scheduler();
