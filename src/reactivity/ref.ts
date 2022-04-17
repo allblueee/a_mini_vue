@@ -55,3 +55,23 @@ export function isRef(ref) {
 export function unRef(ref) {
     return isRef(ref) ? ref.value : ref;
 }
+
+export function proxyRefs(objectWithRefs) {
+    return new Proxy(objectWithRefs, {
+        get(target, key) {
+            return unRef(Reflect.get(target, key));
+        },
+
+        set(target, key, value) {
+            if(isRef(target[key]) && !isRef(value)){
+                // value 不是 isRef 类型。
+                // 但仍然要保持这个属性是 Ref 类型。因此改变 value 的值
+                return (target[key].value = value);
+            }else {
+                // 如果属性不是 Ref 或者 要赋值的是 Ref 类型，那么直接赋值就好
+                return Reflect.set(target, key, value);
+                // return target[key] = value
+            }
+        }
+    } )
+}

@@ -1,6 +1,6 @@
 import { effect } from "../effect";
 import { reactive } from "../reactive";
-import { isRef, ref, unRef } from "../ref";
+import { isRef, proxyRefs, ref, unRef } from "../ref";
 
 describe("ref", () => {
     it("happy path", () => {
@@ -55,5 +55,28 @@ describe("ref", () => {
         const a = ref(1)
         expect(unRef(a)).toBe(1)
         expect(unRef(1)).toBe(1)
+    })
+
+    it("proxyRefs", () => {
+        const user = {
+            age: ref(10),
+            name: "xiaohong",
+        };
+        // 对 ref 对象进行代理，不需要写 .value 就可以访问值
+        // get 对象时，如果是 ref 类型，返回 .value 否则返回原值
+        // set 对象时，如果是 ref 类型，对 .value 修改
+        const proxyUser = proxyRefs(user);
+        expect(user.age.value).toBe(10)
+        expect(proxyUser.age).toBe(10);
+        expect(proxyUser.name).toBe("xiaohong")
+
+        proxyUser.age = 20;
+
+        expect(proxyUser.age).toBe(20);
+        expect(user.age.value).toBe(20);
+
+        proxyUser.age = ref(15);
+        expect(proxyUser.age).toBe(15);
+        expect(user.age.value).toBe(15);
     })
 })
