@@ -7,6 +7,11 @@ export function render(vnode, container) {
 }
 
 function patch(vnode, container) {
+    // 判断 vnode 是不是一个 element？
+    // 区分 element 和 component 
+
+    // 处理 element 
+
     // 处理组件
     processComponent(vnode, container);
 }
