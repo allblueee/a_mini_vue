@@ -6,7 +6,8 @@ export function createVNode(type, props?, children?) {
     const vnode = {
         type,
         props,
-        children
+        children,
+        el: null
     };
     // 返回虚拟节点
     return vnode;

@@ -10,6 +10,7 @@ export function render(vnode, container) {
 function patch(vnode, container) {
     // 判断 vnode 是不是一个 element？
     // 区分 element 和 component 
+    console.log(typeof vnode.type)
     if (typeof vnode.type === "string") {
         // 处理 element 
         processElement(vnode, container);
@@ -28,8 +29,8 @@ function processElement(vnode: any, container: any) {
     mountElement(vnode, container);
 }
 function mountElement(vnode: any, container: any) {
-    const el = document.createElement(vnode.type)
- 
+    const el = (vnode.el = document.createElement(vnode.type))
+
     // string array
     const { children } = vnode;
 
@@ -64,13 +65,15 @@ function mountComponent(vnode: any, container) {
     const instance = createComponentInstance(vnode);
 
     setupComponent(instance);
-    setupRenderEffect(instance, container);
+    setupRenderEffect(instance, vnode, container);
 }
 
-function setupRenderEffect(instance: any, container) {
-    const subTree = instance.render();
+function setupRenderEffect(instance: any, vnode, container) {
+    const { proxy } = instance;
+    // 代理 实例上的 setupState 中的属性 这里是 msg
+    const subTree = instance.render.call(proxy);
     patch(subTree, container);
+
+    // element 处理完成
+    vnode.el = subTree.el;
 }
-
-
-

@@ -1,10 +1,11 @@
 import { h } from '../../lib/guide-mini-vue.esm.js'
 
-
+window.self = null;
 export const App = {
     // <template>
     // render
     render() {
+        window.self = this;
         return h(
             "div",
             {
@@ -12,8 +13,9 @@ export const App = {
                 class: ["red", "hard"]
             },
             // "string"
+            "hi, " + this.msg
             // Array
-            [h("p", {class:"red"},"hi"),h("p", {class:"blue"},"allblueee")]
+            // [h("p", { class: "red" }, "hi"), h("p", { class: "blue" }, "allblueee")]
         );
     },
 
