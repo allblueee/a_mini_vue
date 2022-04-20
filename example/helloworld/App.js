@@ -5,7 +5,7 @@ export const App = {
     // <template>
     // render
     render() {
-        window.self = this;
+        window.self = this
         return h(
             "div",
             {
@@ -13,9 +13,9 @@ export const App = {
                 class: ["red", "hard"]
             },
             // "string"
-            "hi, " + this.msg
+            // "hi, " + this.ms
             // Array
-            // [h("p", { class: "red" }, "hi"), h("p", { class: "blue" }, "allblueee")]
+            [h("p", { class: "red" }, "hi"), h("p", { class: "blue" }, this.msg)]
         );
     },
 

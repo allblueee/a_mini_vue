@@ -61,19 +61,23 @@ function mountChildren(vnode, container) {
 function processComponent(vnode: any, container: any) {
     mountComponent(vnode, container);
 }
-function mountComponent(vnode: any, container) {
-    const instance = createComponentInstance(vnode);
+function mountComponent(initialVnode: any, container) {
+    const instance = createComponentInstance(initialVnode);
 
     setupComponent(instance);
-    setupRenderEffect(instance, vnode, container);
+    setupRenderEffect(instance, initialVnode, container);
 }
 
-function setupRenderEffect(instance: any, vnode, container) {
+function setupRenderEffect(instance: any, initialVnode, container) {
     const { proxy } = instance;
     // 代理 实例上的 setupState 中的属性 这里是 msg
+    // 又是 this 指向的理解，函数内 this 的指向调用他的对象/函数的 this
+    // this 链的继承？
+    // 在 proxy 这里调用 h函数时，由于 proxy 已经处理好了 setup 中的数据，因此可以用 this.msg 拿到
+    // 在 h函数里调用 this.$el 也是如此代理的方式
     const subTree = instance.render.call(proxy);
     patch(subTree, container);
 
     // element 处理完成
-    vnode.el = subTree.el;
+    initialVnode.el = subTree.el;
 }
