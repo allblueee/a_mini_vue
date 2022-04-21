@@ -10,7 +10,10 @@ export const App = {
             "div",
             {
                 id: "root",
-                class: ["red", "hard"]
+                class: ["red", "hard"],
+                onClick() {
+                    console.log("clicked");
+                },
             },
             // "string"
             // "hi, " + this.ms

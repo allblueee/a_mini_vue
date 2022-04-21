@@ -47,13 +47,20 @@ function mountElement(vnode: any, container: any) {
     // props 
     const { props } = vnode
     for (const key in props) {
+        // console.log(key)
         const val = props[key];
-        el.setAttribute(key, val);
+        // 格式 on + Event name 
+        const isOn = (key:string)=> /^on[A-Z]/.test(key)
+        if (isOn(key)) {
+            const evenet = key.slice(2).toLowerCase();
+            el.addEventListener(evenet, val)
+        }
+        else {
+            el.setAttribute(key, val);
+        }
     }
 
     container.append(el);
-
-    document.body.append(el);
 }
 function mountChildren(vnode, container) {
     vnode.children.forEach((v) => {
