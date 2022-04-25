@@ -1,10 +1,13 @@
 import { isObject } from "../shared/index";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
+import { createAppAPI } from "./createApp";
 import { Fragment, Textt } from "./vnode";
 
-export function render(vnode, container) {
-    // 1.patch
+export function createRenderer(options) {
+
+    const {createElement, patchProp, insert}=options
+    function render(vnode, container) {
     patch(vnode, container, null);
 
 }
@@ -53,7 +56,7 @@ function processElement(vnode: any, container: any, parentComponent) {
     mountElement(vnode, container, parentComponent);
 }
 function mountElement(vnode: any, container: any, parentComponent) {
-    const el = (vnode.el = document.createElement(vnode.type))
+    const el = (vnode.el = createElement(vnode.type))
 
     // string array
     const { children, shapeFlags } = vnode;
@@ -70,18 +73,12 @@ function mountElement(vnode: any, container: any, parentComponent) {
     for (const key in props) {
         // console.log(key)
         const val = props[key];
-        // 格式 on + Event name 
-        const isOn = (key: string) => /^on[A-Z]/.test(key)
-        if (isOn(key)) {
-            const evenet = key.slice(2).toLowerCase();
-            el.addEventListener(evenet, val)
-        }
-        else {
-            el.setAttribute(key, val);
-        }
+        
+        patchProp(el, key, val)
     }
 
-    container.append(el);
+    // container.append(el);
+    insert(el, container)
 }
 function mountChildren(vnode, container, parentComponent) {
     vnode.children.forEach((v) => {
@@ -91,7 +88,7 @@ function mountChildren(vnode, container, parentComponent) {
 
 
 // 处理组件部分流程
-function processComponent(vnode: any, container: any,parentComponent) {
+function processComponent(vnode: any, container: any, parentComponent) {
     mountComponent(vnode, container, parentComponent);
 }
 function mountComponent(initialVnode: any, container, parentComponent) {
@@ -114,4 +111,7 @@ function setupRenderEffect(instance: any, initialVnode, container) {
     // element 处理完成
     initialVnode.el = subTree.el;
 }
-
+    return {
+        createApp: createAppAPI(render)
+    }
+}
