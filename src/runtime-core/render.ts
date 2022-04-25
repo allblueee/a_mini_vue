@@ -6,7 +6,7 @@ import { Fragment, Textt } from "./vnode";
 
 export function createRenderer(options) {
 
-    const {createElement, patchProp, insert}=options
+    const {createElement:hostCreateElement, patchProp:hostPatchProp, insert:hostInsert}=options
     function render(vnode, container) {
     patch(vnode, container, null);
 
@@ -56,7 +56,7 @@ function processElement(vnode: any, container: any, parentComponent) {
     mountElement(vnode, container, parentComponent);
 }
 function mountElement(vnode: any, container: any, parentComponent) {
-    const el = (vnode.el = createElement(vnode.type))
+    const el = (vnode.el = hostCreateElement(vnode.type))
 
     // string array
     const { children, shapeFlags } = vnode;
@@ -74,11 +74,11 @@ function mountElement(vnode: any, container: any, parentComponent) {
         // console.log(key)
         const val = props[key];
         
-        patchProp(el, key, val)
+        hostPatchProp(el, key, val)
     }
 
     // container.append(el);
-    insert(el, container)
+    hostInsert(el, container)
 }
 function mountChildren(vnode, container, parentComponent) {
     vnode.children.forEach((v) => {
