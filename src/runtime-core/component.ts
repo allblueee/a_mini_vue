@@ -29,14 +29,21 @@ export function setupComponent(instance) {
 function setupStatefulComponent(instance: any) {
     const Component = instance.type;
     instance.proxy = new Proxy({ _: instance }, PublicInstanceProxyHandlers)
-    console.log(instance)
+    // console.log(instance)
     const { setup } = Component;
 
     if (setup) {
+        // 设置当前实例对象
+        setCurrentInstance(instance)
+
         const setupResult = setup(shallowReadonly(instance.props), {
             emit: instance.emit,
         });
+        // 由于 getCurrentInstance 函数都是在setup函数内部调用
+        // 因此调用完成做一个清空操作
 
+        setCurrentInstance(null)
+        
         handleSetupResult(instance, setupResult);
     }
 }
@@ -61,4 +68,12 @@ function finishComponentSetup(instance: any) {
     }
 }
 
- 
+let currentInstance = null
+
+export function getCurrentInstance() {
+    return currentInstance
+}
+
+export function setCurrentInstance(instance) {
+    currentInstance = instance
+}
