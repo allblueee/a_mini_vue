@@ -5,7 +5,7 @@ window.self = null;
 export const App = {
     // <template>
     // render
-    name:"App",
+    name: "App",
     render() {
         window.self = this
         return h(

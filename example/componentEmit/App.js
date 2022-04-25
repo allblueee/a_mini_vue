@@ -8,15 +8,20 @@ export const App = {
     name: "App",
     render() {
         window.self = this
-        return h("div", {}, [h("div", {}, "App"), h(Foo, {
-            // 组件 emit on+Event
-            onAdd(a,b){
-                console.log("onAdd",a,b)
-            },
-            onAddFoo(a,b){
-                console.log("onAddFoo",a,b)
-            }
-        })])
+        return h("div", {},
+            [h("div",
+                {},
+                "App"
+            ),
+            h(Foo, {
+                // 组件 emit on+Event
+                onAdd(a, b) {
+                    console.log("onAdd", a, b)
+                },
+                onAddFoo(a, b) {
+                    console.log("onAddFoo", a, b)
+                }
+            })])
     },
 
     setup() {

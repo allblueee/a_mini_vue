@@ -26,8 +26,6 @@ export function setupComponent(instance) {
     setupStatefulComponent(instance);
 }
 
-
-
 function setupStatefulComponent(instance: any) {
     const Component = instance.type;
     instance.proxy = new Proxy({ _: instance }, PublicInstanceProxyHandlers)
@@ -45,7 +43,7 @@ function setupStatefulComponent(instance: any) {
 
 function handleSetupResult(instance, setupResult: any) {
     // function / Object
-
+    // 有可能是函数类型的
     if (typeof setupResult === "object") {
         // setupState
         instance.setupState = setupResult;
@@ -63,3 +61,4 @@ function finishComponentSetup(instance: any) {
     }
 }
 
+ 

@@ -13,10 +13,9 @@ export const Foo = {
         // 作用域插槽
         const age = 18;
         return h("div", {}, [
-            renderSlots(this.$slots, "header", {
-                age,
-            }),
+            renderSlots(this.$slots, "header", { age, }),
             foo,
-            renderSlots(this.$slots, "footer")])
+            renderSlots(this.$slots, "footer")
+        ])
     },
 }

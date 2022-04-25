@@ -1,6 +1,7 @@
 import { isObject } from "../shared/index";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
+import { Fragment, Textt } from "./vnode";
 
 export function render(vnode, container) {
     // 1.patch
@@ -12,17 +13,37 @@ function patch(vnode, container) {
     // ShapeFlags 判断 vnode类型
     // 判断 vnode 是不是一个 element？
     // 区分 element 和 component 
-    // console.log(typeof vnode.type)
-    const { shapeFlags } = vnode;
-    if (shapeFlags & ShapeFlags.Element) {
-        // 处理 element 
-        processElement(vnode, container);
+    const { type, shapeFlags } = vnode;
 
-    } else if (isObject(vnode.type)) {
-        // 处理组件
-        processComponent(vnode, container);
+    // Fragment 只渲染 children
+    switch (type) {
+        case Fragment:
+            processFragment(vnode, container);
+            break;
+        case Textt:
+            processText(vnode, container)
+            break;
+        default:
+            if (shapeFlags & ShapeFlags.Element) {
+                // 处理 element 
+                processElement(vnode, container);
 
+            } else if (isObject(vnode.type)) {
+                // 处理组件
+                processComponent(vnode, container);
+
+            }
     }
+}
+
+function processText(vnode: any, container: any) {
+    const { children } = vnode
+    const textNode = (vnode.el = document.createTextNode(children))
+    container.append(textNode)
+}
+
+function processFragment(vnode: any, container: any) {
+    mountChildren(vnode, container)
 }
 
 
@@ -50,7 +71,7 @@ function mountElement(vnode: any, container: any) {
         // console.log(key)
         const val = props[key];
         // 格式 on + Event name 
-        const isOn = (key:string)=> /^on[A-Z]/.test(key)
+        const isOn = (key: string) => /^on[A-Z]/.test(key)
         if (isOn(key)) {
             const evenet = key.slice(2).toLowerCase();
             el.addEventListener(evenet, val)
@@ -93,3 +114,4 @@ function setupRenderEffect(instance: any, initialVnode, container) {
     // element 处理完成
     initialVnode.el = subTree.el;
 }
+
