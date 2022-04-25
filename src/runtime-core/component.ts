@@ -4,13 +4,16 @@ import { initProps } from "./componentProps";
 import { PublicInstanceProxyHandlers } from "./componentPublicInstance";
 import { initSlots } from "./componentSlots";
 
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
+    console.log("create", parent)
     const component = {
         vnode,
         type: vnode.type,
         setupState: {},
         props: {},
         slots: {},
+        provides: parent ? parent.provides : {},
+        parent,
         emit: () => { }
     };
     // bind 让用户不需要传递 instance
@@ -43,7 +46,7 @@ function setupStatefulComponent(instance: any) {
         // 因此调用完成做一个清空操作
 
         setCurrentInstance(null)
-        
+
         handleSetupResult(instance, setupResult);
     }
 }

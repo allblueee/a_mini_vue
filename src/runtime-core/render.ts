@@ -5,11 +5,11 @@ import { Fragment, Textt } from "./vnode";
 
 export function render(vnode, container) {
     // 1.patch
-    patch(vnode, container);
+    patch(vnode, container, null);
 
 }
 
-function patch(vnode, container) {
+function patch(vnode, container, parentComponent) {
     // ShapeFlags 判断 vnode类型
     // 判断 vnode 是不是一个 element？
     // 区分 element 和 component 
@@ -18,7 +18,7 @@ function patch(vnode, container) {
     // Fragment 只渲染 children
     switch (type) {
         case Fragment:
-            processFragment(vnode, container);
+            processFragment(vnode, container, parentComponent);
             break;
         case Textt:
             processText(vnode, container)
@@ -26,11 +26,11 @@ function patch(vnode, container) {
         default:
             if (shapeFlags & ShapeFlags.Element) {
                 // 处理 element 
-                processElement(vnode, container);
+                processElement(vnode, container, parentComponent);
 
-            } else if (isObject(vnode.type)) {
+            } else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
                 // 处理组件
-                processComponent(vnode, container);
+                processComponent(vnode, container, parentComponent);
 
             }
     }
@@ -42,17 +42,17 @@ function processText(vnode: any, container: any) {
     container.append(textNode)
 }
 
-function processFragment(vnode: any, container: any) {
-    mountChildren(vnode, container)
+function processFragment(vnode: any, container: any, parentComponent) {
+    mountChildren(vnode, container, parentComponent)
 }
 
 
 // 处理 element 流程
-function processElement(vnode: any, container: any) {
+function processElement(vnode: any, container: any, parentComponent) {
     // init / update
-    mountElement(vnode, container);
+    mountElement(vnode, container, parentComponent);
 }
-function mountElement(vnode: any, container: any) {
+function mountElement(vnode: any, container: any, parentComponent) {
     const el = (vnode.el = document.createElement(vnode.type))
 
     // string array
@@ -63,7 +63,7 @@ function mountElement(vnode: any, container: any) {
         el.textContent = children;
     } else if (shapeFlags & ShapeFlags.ARRAY_CHILDREN) {
         // array children
-        mountChildren(vnode, el)
+        mountChildren(vnode, el, parentComponent)
     }
     // props 
     const { props } = vnode
@@ -83,19 +83,19 @@ function mountElement(vnode: any, container: any) {
 
     container.append(el);
 }
-function mountChildren(vnode, container) {
+function mountChildren(vnode, container, parentComponent) {
     vnode.children.forEach((v) => {
-        patch(v, container);
+        patch(v, container, parentComponent);
     })
 }
 
 
 // 处理组件部分流程
-function processComponent(vnode: any, container: any) {
-    mountComponent(vnode, container);
+function processComponent(vnode: any, container: any,parentComponent) {
+    mountComponent(vnode, container, parentComponent);
 }
-function mountComponent(initialVnode: any, container) {
-    const instance = createComponentInstance(initialVnode);
+function mountComponent(initialVnode: any, container, parentComponent) {
+    const instance = createComponentInstance(initialVnode, parentComponent);
 
     setupComponent(instance);
     setupRenderEffect(instance, initialVnode, container);
@@ -109,7 +109,7 @@ function setupRenderEffect(instance: any, initialVnode, container) {
     // 在 proxy 这里调用 h函数时，由于 proxy 已经处理好了 setup 中的数据，因此可以用 this.msg 拿到
     // 在 h函数里调用 this.$el 也是如此代理的方式
     const subTree = instance.render.call(proxy);
-    patch(subTree, container);
+    patch(subTree, container, instance);
 
     // element 处理完成
     initialVnode.el = subTree.el;
