@@ -1,7 +1,7 @@
 // 老的是 array
 // 新的是 array
 
-import { ref, h } from "../../dist/mini-vue.esm-bundler.js";
+import { ref, h } from '../../lib/guide-mini-vue.esm.js'
 
 // 1. 左侧的对比
 // (a b) c
@@ -210,34 +210,34 @@ import { ref, h } from "../../dist/mini-vue.esm-bundler.js";
 
 // fix c 节点应该是 move 而不是删除之后重新创建的
 const prevChildren = [
-  h("p", { key: "A" }, "A"),
-  h("p", {}, "C"),
-  h("p", { key: "B" }, "B"),
-  h("p", { key: "D" }, "D"),
-];
+	h('p', { key: 'A' }, 'A'),
+	h('p', {}, 'C'),
+	h('p', { key: 'B' }, 'B'),
+	h('p', { key: 'D' }, 'D'),
+]
 
 const nextChildren = [
-  h("p", { key: "A" }, "A"),
-  h("p", { key: "B" }, "B"),
-  h("p", {}, "C"),
-  h("p", { key: "D" }, "D"),
-];
+	h('p', { key: 'A' }, 'A'),
+	h('p', { key: 'B' }, 'B'),
+	h('p', {}, 'C'),
+	h('p', { key: 'D' }, 'D'),
+]
 
 export default {
-  name: "ArrayToArray",
-  setup() {
-    const isChange = ref(false);
-    window.isChange = isChange;
+	name: 'ArrayToArray',
+	setup() {
+		const isChange = ref(false)
+		window.isChange = isChange
 
-    return {
-      isChange,
-    };
-  },
-  render() {
-    const self = this;
+		return {
+			isChange,
+		}
+	},
+	render() {
+		const self = this
 
-    return self.isChange === true
-      ? h("div", {}, nextChildren)
-      : h("div", {}, prevChildren);
-  },
-};
+		return self.isChange === true
+			? h('div', {}, nextChildren)
+			: h('div', {}, prevChildren)
+	},
+}
