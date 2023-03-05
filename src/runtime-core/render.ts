@@ -69,6 +69,7 @@ export function createRenderer(options) {
         const oldProps = n1.props || EMPTY_OBJ;
         const newProps = n2.props || EMPTY_OBJ; 
         const el = (n2.el = n1.el);
+        
         patchProps(el, oldProps, newProps)
     }
     function patchProps(el, oldProps, newProps) {
