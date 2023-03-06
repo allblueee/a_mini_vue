@@ -75,7 +75,6 @@ export function createRenderer(options) {
         patchProps(el, oldProps, newProps)
     }
     function patchChildren(n1, n2, container, parentComponent) {
-        debugger
         const prevShapeFlag = n1.shapeFlags
         const { shapeFlags } = n2
         const c2 = n2.children
@@ -99,7 +98,7 @@ export function createRenderer(options) {
             else if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
                 // hostRemove(n1.el) 不可以这样 这样是把 <tag>text</tag> 全部删了
                 // 仍然需要保持 tag标签
-                hostSetElementText(container,"")
+                hostSetElementText(container, "")
                 mountChildren(n2, container, parentComponent)
             }
 
@@ -166,10 +165,19 @@ export function createRenderer(options) {
 
     // 处理组件部分流程
     function processComponent(n1, n2: any, container: any, parentComponent) {
-        mountComponent(n2, container, parentComponent)
+        if (!n1) {
+            mountComponent(n2, container, parentComponent)
+        } else {
+            updateComponent(n1, n2, container)
+        }
+    }
+    function updateComponent(n1: any, n2: any, container) {
+        const instance = (n2.compoennt = n1.component)
+        instance.next = n2
+        instance.update()
     }
     function mountComponent(initialVnode: any, container, parentComponent) {
-        const instance = createComponentInstance(initialVnode, parentComponent)
+        const instance = (initialVnode.component = createComponentInstance(initialVnode, parentComponent))
 
         setupComponent(instance)
         setupRenderEffect(instance, initialVnode, container)
@@ -179,7 +187,8 @@ export function createRenderer(options) {
         // 更新逻辑的核心
         // 依赖变化，则重新执行 render 函数 + patch
         // 怎么收集的依赖呢？ 在 render 函数中访问了很多响应式对象啊
-        effect(() => {
+        // 拿到 runner
+        instance.update = effect(() => {
             if (!instance.isMounted) {
                 console.log('init')
                 const { proxy } = instance
@@ -198,10 +207,15 @@ export function createRenderer(options) {
                 instance.isMounted = true
             } else {
                 console.log('update')
-                const { proxy } = instance
+                // 需要一个 vnode 
+                const { next, proxy, vnode } = instance
+                if (next) {
+                    next.el = vnode.el;
+                    updateComponentPreRender(instance, next)
+                }
                 const subTree = instance.render.call(proxy)
                 const prevSubTree = instance.subTree
-
+                debugger
                 // 更新旧节点，为当前节点，为下一次更新做铺垫
                 instance.subTree = subTree
                 patch(prevSubTree, subTree, container, instance)
@@ -211,4 +225,11 @@ export function createRenderer(options) {
     return {
         createApp: createAppAPI(render),
     }
+}
+
+function updateComponentPreRender(instance, nextVNode) {
+    instance.vnode = nextVNode
+    instance.next = null
+
+    instance.props = nextVNode.props
 }
