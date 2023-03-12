@@ -38,7 +38,6 @@ function isEnd(context, ancestors) {
             }
         }
     }
-
     // source 有值
     return !s;
 }
